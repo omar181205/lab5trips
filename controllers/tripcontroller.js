@@ -7,17 +7,17 @@ const db = db_access.db;
 
 const CreateTrip = (req,res) => {
     const {
-destinationname,
-location,
-continent,
-language,
-description,
-flightcost,
-accomadationcost = 0,
-mealcost = 0,
-visacost = 0,
-transportationcost = 0,
-currencycode = 'N/A',
+        destinationname,
+        location,
+        continent,
+        language,
+        description,
+        flightcost = 0,
+        accomadationcost = 0,
+        mealcost = 0,
+        visacost = 0,
+        transportationcost = 0,
+        currencycode = 'N/A',
 
     }=req.body;
 
@@ -42,13 +42,11 @@ currencycode = 'N/A',
                     console.log(err);
             return res.status(500).json({message :' databasebase error', error : err.message});
             }
-        res.status(201).json({ message : 'trip created successfully'});
-            }
-           
-           
         
-    );
-};
+            
+           res.status(201).json({ message : 'trip created successfully'});
+        }             
+)};
 
 const retreieveALLtrips = (req,res) => {
 
@@ -64,23 +62,26 @@ const retreieveALLtrips = (req,res) => {
 
 };
 
-    const newtrips={
-id:trips.length+1,
-destinationname,
-location,
-continent,
-language,
-description,
-flightcost,
-accomadationcost,
-mealcost,
-visacost,
-transportationcost,
-currencycode,
-dailycost:flightcost+accomadationcost+mealcost+visacost+transportationcost
+// const newtrips={
+// id:trips.length+1,
+// destinationname,
+// location,
+// continent,
+// language,
+// description,
+// flightcost,
+// accomadationcost,
+// mealcost,
+// visacost,
+// transportationcost,
+// currencycode,
+// dailycost:flightcost+accomadationcost+mealcost+visacost+transportationcost
+// };
+
+
+// trips.push(newtrip);
+
+module.exports = {
+    CreateTrip,
+    retreieveALLtrips
 };
-
-
-trips.push(newtrip);
-
-module.exports = {CreateTrip,};
