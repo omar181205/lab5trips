@@ -15,7 +15,7 @@ Triprouter
 .route('/')
 .post(CreateTrip)
 // .get(retrieveTrips);
-
+Triprouter.use(verifyToken)
 // TripRouter
 // .route('/:id')
 // .get(retrievetripsbyid)
