@@ -9,11 +9,13 @@ db.serialize(() =>  {
     db.run(db_access.createTripTable , (err) => {
         if(err) console.log('error creating trip table', err.message);
     });
-});
 
     db.run(db_access.createUserTable , (err) => {
         if(err) console.log('error creating user table', err.message);
     });
+});
+
+    
 ;
 
 app.listen(port,()=>{

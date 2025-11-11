@@ -1,56 +1,97 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const db = require('../db.js');
+const {db} = require('../db')
 
 const signToken = (id, role) => {
-    return jwt.sign({ id, role }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN
-    });
-};
+    return jwt.sign({id, role}, process.env.JWT_SECRET, {expiresIn: process.env.JWT_EXPIRES_IN});
+}
 
-const signup = (req,res) => {
-    const name = req.body.name
-    const email = req.body.email;
-    const password = req.body.password;
+// POST /signup
+const signUp = (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const role = 'user'; // default to non-admin
 
-    if ( !name||!email || !password) {
-        return res.status(400).send('Please provide your name, email and password.');
+  if (!email || !password) {
+    return res.status(400).send('Please provide email, and password.');
+  }
+
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Error hashing password.');
     }
 
-    console.log("signup attempt:", name,email, password);
-    const query = `SELECT * FROM USER WHERE EMAIL='${email}'`;
+    // Insert
+    const query = `
+      INSERT INTO USER (EMAIL, ROLE, PASSWORD)
+      VALUES ('${email}', '${role}', '${hashedPassword}')
+    `;
 
-    db.get(query, (err, row) => {
-        if (err) {
-            console.log(err);
-            return res.status(500).send('Database error');
+    db.run(query, (err) => {
+      if (err) {
+        // Handle unique constraint violation
+        if (err.message.includes('UNIQUE constraint')) {
+          return res.status(400).send('Email already exists.');
         }
+        console.error(err);
+        return res.status(500).send('Database error.');
+      }
 
-        // Compare the hashed password
-        bcrypt.compare(password, row.PASSWORD, (err, isMatch) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).send('Error verifying password.');
-            }
-
-            if (!isMatch) {
-                return res.status(401).send('Invalid credentials.');
-            }
-
-            // Generate JWT token for successful login
-            const token = signToken(row.ID, row.ROLE);
-            return res.status(200).json({
-                message: 'Login successful',
-                token,
-                user: {
-                    id: row.ID,
-                    email: row.EMAIL,
-                    role: row.ROLE
-                }
-            });
-        });
+      // Create token
+      const token = signToken(this.lastID, role);
+      return res.status(201).json({
+        status: 'success',
+        message: 'Registration successful',
+        token,
+      });
     });
+  });
 };
+
+// const signup = (req,res) => {
+//     const name = req.body.name
+//     const email = req.body.email;
+//     const password = req.body.password;
+
+//     if ( !name||!email || !password) {
+//         return res.status(400).send('Please provide your name, email and password.');
+//     }
+
+//     console.log("signup attempt:", name,email, password);
+//     const query = `SELECT * FROM USER WHERE EMAIL='${email}'`;
+
+//     db.get(query, (err, row) => {
+//         if (err) {
+//             console.log(err);
+//             return res.status(500).send('Database error');
+//         }
+
+//         // Compare the hashed password
+//         bcrypt.compare(password, row.PASSWORD, (err, isMatch) => {
+//             if (err) {
+//                 console.error(err);
+//                 return res.status(500).send('Error verifying password.');
+//             }
+
+//             if (!isMatch) {
+//                 return res.status(401).send('Invalid credentials.');
+//             }
+
+//             // Generate JWT token for successful login
+//             const token = signToken(row.ID, row.ROLE);
+//             return res.status(200).json({
+//                 message: 'Login successful',
+//                 token,
+//                 user: {
+//                     id: row.ID,
+//                     email: row.EMAIL,
+//                     role: row.ROLE
+//                 }
+//             });
+//         });
+//     });
+// };
 
 
 const login = (req, res) => {
@@ -117,4 +158,4 @@ const verifyToken = (req, res, next) => {
 
 
 
-module.exports = { login , verifyToken};
+module.exports = { login , signUp, verifyToken};

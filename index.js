@@ -16,7 +16,7 @@ app.use('/api/v1/trips',TripRouter);
 const cookieParser = require('cookie-parser')
 app.use(cookieParser());
 
-app.use('auth', authRouter);
+app.use('/auth', authRouter);
 // app.use('/apl/v1/users',UserRouter);
 module.exports=
 {
