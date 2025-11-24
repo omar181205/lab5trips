@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/v1/trips',TripRouter);
-
+app.use(express.static(Path.join(__dirname,'public')));
 const cookieParser = require('cookie-parser')
 app.use(cookieParser());
 
